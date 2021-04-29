@@ -2,7 +2,6 @@ package org.mi5.sightseeing.config.auth.dto;
 
 import lombok.Builder;
 import lombok.Getter;
-import org.mi5.sightseeing.domain.Role;
 import org.mi5.sightseeing.domain.User;
 
 import java.util.Map;
@@ -14,21 +13,23 @@ public class OAuthAttributes {
     private String name;
     private String email;
     private String picture;
+    private String platform;
 
     @Builder
-    public OAuthAttributes(Map<String, Object> attributes, String nameAttributeKey, String name, String email, String picture) {
+    public OAuthAttributes(Map<String, Object> attributes, String nameAttributeKey, String name, String email, String picture, String platform) {
         this.attributes = attributes;
         this.nameAttributeKey = nameAttributeKey;
         this.name = name;
         this.email = email;
         this.picture = picture;
+        this.platform = platform;
     }
 
     public static OAuthAttributes of(String registrationId, String userNameAttributeName, Map<String, Object> attributes) {
         if("naver".equals(registrationId)){
             return ofNaver("id", attributes);
         }
-        else if("Kakao".equals(registrationId)){
+        else if("kakao".equals(registrationId)){
             return ofKakao("id", attributes);
         }
         return ofGoogle(userNameAttributeName, attributes);
@@ -39,6 +40,7 @@ public class OAuthAttributes {
                 .name((String) attributes.get("name"))
                 .email((String) attributes.get("email"))
                 .picture((String) attributes.get("picture"))
+                .platform("Google")
                 .attributes(attributes)
                 .nameAttributeKey(userNameAttributeName)
                 .build();
@@ -47,14 +49,18 @@ public class OAuthAttributes {
     private static OAuthAttributes ofNaver(String userNameAttributeName, Map<String, Object> attributes){
         Map<String, Object> response = (Map<String, Object>) attributes.get("response");
 
+        System.out.println();
+
         return OAuthAttributes.builder()
                 .name((String) response.get("name"))
                 .email((String) response.get("email"))
                 .picture((String) response.get("profile_image"))
+                .platform("Naver")
                 .attributes(response)
                 .nameAttributeKey(userNameAttributeName)
                 .build();
     }
+
     private static OAuthAttributes ofKakao(String userNameAttributeName, Map<String, Object> attributes){
         Map<String, Object> kakao_account = (Map<String, Object>) attributes.get("kakao_account");
         Map<String, Object> profile = (Map<String, Object>) kakao_account.get("profile");
@@ -63,6 +69,7 @@ public class OAuthAttributes {
                 .name((String) profile.get("nickname"))
                 .picture((String) profile.get("profile_image"))
                 .email((String) kakao_account.get("email"))
+                .platform("Kakao")
                 .attributes(attributes)
                 .nameAttributeKey(userNameAttributeName)
                 .build();
@@ -72,7 +79,7 @@ public class OAuthAttributes {
                 .name(name)
                 .email(email)
                 .picture(picture)
-                .role(Role.USER)
+                .platform(platform)
                 .build();
     }
 }
